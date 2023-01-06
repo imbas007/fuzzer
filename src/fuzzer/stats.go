@@ -7,12 +7,15 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate easytags $GOFILE json:camel
+
 type stats struct {
-	LastPrint     time.Time
-	LastProcessed int
-	Total         int `json:"total"`
-	Processed     int `json:"processed"`
-	Errors        int `json:"errors"`
+	LastPrint     time.Time `json:"lastPrint"`
+	LastProcessed int       `json:"lastProcessed"`
+	Total         int       `json:"total"`
+	Processed     int       `json:"processed"`
+	Errors        int       `json:"errors"`
+	Saved         int       `json:"saved"`
 }
 
 func (f *Fuzzer) PrintStats() {
@@ -28,6 +31,7 @@ func (f *Fuzzer) PrintStats() {
 		zap.Int("total", f.stats.Total),
 		zap.Int("processed", f.stats.Processed),
 		zap.Int("left", f.stats.Total-f.stats.Processed),
+		zap.Int("saved", f.stats.Saved),
 		zap.Int("errors", f.stats.Errors),
 		zap.Float64("req/s", reqPerSec),
 		zap.Duration("runtime", time.Since(f.startedAt)),

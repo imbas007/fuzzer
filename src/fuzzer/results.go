@@ -2,6 +2,7 @@ package fuzzer
 
 import (
 	"encoding/json"
+	"fmt"
 	"fuzzer/src/logger"
 	"os"
 	"strconv"
@@ -22,13 +23,14 @@ type result struct {
 
 // Results is worker which saves results one by one in jsonl format
 func (f *Fuzzer) Results() {
-	fd, err := os.OpenFile(f.OutFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	fd, err := os.Open(f.OutFile)
 	if err != nil {
 		logger.Log.Error("error in opening out file",
 			zap.Error(err),
 		)
 		return
 	}
+	defer fd.Close()
 
 	defer func() {
 		f.mutex.Lock()
@@ -68,9 +70,10 @@ func (f *Fuzzer) Results() {
 			continue
 		}
 
+		fmt.Println(r)
 		raw, _ := json.Marshal(r)
-
 		fd.WriteString(string(raw) + "\n")
+		fd.Sync()
 	}
 }
 

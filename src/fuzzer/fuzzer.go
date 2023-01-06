@@ -36,6 +36,7 @@ type Config struct {
 	jobs          chan job
 	control       chan bool
 	burstyLimiter chan bool
+	ExitChannel   chan string
 
 	stats        stats
 	mutexStats   *sync.Mutex
@@ -111,6 +112,7 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.mutex = &sync.Mutex{}
 	fuzzer.mutexStats = &sync.Mutex{}
 	fuzzer.burstyLimiter = make(chan bool, 1)
+	fuzzer.ExitChannel = make(chan string, 1)
 
 	return
 }
@@ -128,6 +130,17 @@ func (f *Fuzzer) Start() {
 		zap.Any("filters", f.Filters),
 		zap.Duration("maxTime", f.MaxTime),
 	))
+
+	if f.MaxTime > 0 {
+		logger.Log.Warn("max time is defined. setting countdown",
+			zap.Duration("maxTime", f.MaxTime),
+		)
+		go func() {
+			<-time.After(f.MaxTime)
+			f.Stop()
+			f.ExitChannel <- "timeouted"
+		}()
+	}
 
 	defer func() {
 		f.mutex.Lock()

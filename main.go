@@ -11,22 +11,8 @@ import (
 	"time"
 )
 
-// args := []string{
-// 	"-timeout", "2",
-// 	"-maxtime", fmt.Sprintf("%.0f", maxTime.Seconds()),
-// 	"-X", j.Method,
-// 	"-c",
-// 	"-noninteractive",
-// 	// "-rate", "50",
-// 	"-w", j.Dictionary,
-// 	"-o", j.GetFileLoc("", "raw"),
-// 	"-fc", "404",
-// 	"-fc", "403",
-// 	"-of", "json",
-// }
-
 func main() {
-	maxTime := flag.Int("maxTime", 3600, "maximum execution time")
+	maxTime := flag.Int("maxTime", 0, "maximum execution time")
 	maxReqSec := flag.Int("maxReqSec", 0, "maximum requests per second, default unlimited")
 	method := flag.String("X", "GET", "GET, POST, HEAD, OPTIONS, PUT ...")
 	filterCodes := flag.String("fc", "", "403,404")
@@ -72,7 +58,6 @@ func main() {
 		syscall.SIGQUIT,
 	)
 
-	exitChannel := make(chan string)
 	go func() {
 		for {
 			s := <-signalChannel
@@ -81,18 +66,18 @@ func main() {
 			switch s {
 			case syscall.SIGHUP:
 			case syscall.SIGINT:
-				exitChannel <- "SIGINT"
+				f.ExitChannel <- "SIGINT"
 				return
 			case syscall.SIGTERM:
-				exitChannel <- "SIGTERM"
+				f.ExitChannel <- "SIGTERM"
 				return
 			case syscall.SIGQUIT:
-				exitChannel <- "SIGQUIT"
+				f.ExitChannel <- "SIGQUIT"
 				return
 			}
 		}
 	}()
 
-	<-exitChannel
+	<-f.ExitChannel
 	f.Stop()
 }

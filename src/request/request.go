@@ -15,14 +15,11 @@ import (
 )
 
 var (
-	ctx    context.Context
-	client *http.Client
+	client  *http.Client
+	timeout = 20 * time.Second
 )
 
 func init() {
-	timeout := 20 * time.Second
-
-	ctx, _ = context.WithTimeout(context.Background(), timeout+time.Duration(2)*time.Second)
 
 	client = &http.Client{
 		Timeout: timeout,
@@ -63,6 +60,7 @@ func Do(address, method string, body []byte) (result []byte, statusCode int, loc
 		zap.Int("lenBody", len(body)),
 	))
 
+	ctx, _ := context.WithTimeout(context.Background(), timeout+time.Duration(2)*time.Second)
 	httpRequest, err := http.NewRequestWithContext(ctx, method, address, bytes.NewBuffer(body))
 
 	if err != nil {
@@ -79,7 +77,15 @@ func Do(address, method string, body []byte) (result []byte, statusCode int, loc
 			zap.Error(err),
 		)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+
+	if resp == nil {
+		return
+	}
 
 	result = make([]byte, maxReadSize)
 	n, err := io.ReadFull(resp.Body, result)

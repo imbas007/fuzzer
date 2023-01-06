@@ -81,6 +81,10 @@ func (f *Fuzzer) Worker(id int) {
 			continue
 		}
 
+		f.mutexStats.Lock()
+		f.stats.Saved += 1
+		f.mutexStats.Unlock()
+
 		f.results <- result{
 			RedirectLocation: redirectLocation,
 			URL:              j.URL,

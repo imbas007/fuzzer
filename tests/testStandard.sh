@@ -7,5 +7,5 @@ go run main.go \
     -u https://google.com/FUZZ \
     -fc 403,404 \
     -maxTime 120 \
-    -o tmp/test.json \
+    -o tmp/standard.json \
     -X GET
