@@ -60,7 +60,9 @@ func Do(address, method string, body []byte) (result []byte, statusCode int, loc
 		zap.Int("lenBody", len(body)),
 	))
 
-	ctx, _ := context.WithTimeout(context.Background(), timeout+time.Duration(2)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout+time.Duration(2)*time.Second)
+	defer cancel()
+
 	httpRequest, err := http.NewRequestWithContext(ctx, method, address, bytes.NewBuffer(body))
 
 	if err != nil {
@@ -68,6 +70,7 @@ func Do(address, method string, body []byte) (result []byte, statusCode int, loc
 		log.Warn("error in creating request",
 			zap.Error(err),
 		)
+		return
 	}
 
 	resp, err := client.Do(httpRequest)
