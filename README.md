@@ -21,7 +21,7 @@ Micro Web Fuzzer written in Go Lang.
 ## Use:
 
 Command line:
-```
+``` Bash
 go run main.go \
     -maxReqSec 17 \
     -w wordlists/big.txt \
@@ -33,7 +33,7 @@ go run main.go \
 ```
 
 As a lib:
-```
+``` Go
 f, err := fuzzer.New(&fuzzer.Config{
 		URL:       *url,
 		Method:    *method,
@@ -50,44 +50,44 @@ f, err := fuzzer.New(&fuzzer.Config{
 		},
 	})
 
-	if err != nil {
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
+if err != nil {
+    flag.PrintDefaults()
+    os.Exit(1)
+}
 
-	go f.Start()
+go f.Start()
 
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel,
-		syscall.SIGHUP,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGQUIT,
-	)
+signalChannel := make(chan os.Signal, 1)
+signal.Notify(signalChannel,
+    syscall.SIGHUP,
+    syscall.SIGINT,
+    syscall.SIGTERM,
+    syscall.SIGQUIT,
+)
 
-	exitChannel := make(chan string)
-	go func() {
-		for {
-			s := <-signalChannel
-			logger.Log.Warn(fmt.Sprintf("received signal %s", s.String()))
+exitChannel := make(chan string)
+go func() {
+    for {
+        s := <-signalChannel
+        logger.Log.Warn(fmt.Sprintf("received signal %s", s.String()))
 
-			switch s {
-			case syscall.SIGHUP:
-			case syscall.SIGINT:
-				exitChannel <- "SIGINT"
-				return
-			case syscall.SIGTERM:
-				exitChannel <- "SIGTERM"
-				return
-			case syscall.SIGQUIT:
-				exitChannel <- "SIGQUIT"
-				return
-			}
-		}
-	}()
+        switch s {
+        case syscall.SIGHUP:
+        case syscall.SIGINT:
+            exitChannel <- "SIGINT"
+            return
+        case syscall.SIGTERM:
+            exitChannel <- "SIGTERM"
+            return
+        case syscall.SIGQUIT:
+            exitChannel <- "SIGQUIT"
+            return
+        }
+    }
+}()
 
-	<-exitChannel
-	f.Stop()
+<-exitChannel
+f.Stop()
 ```
 
 ## Todo:
