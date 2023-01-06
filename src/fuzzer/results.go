@@ -23,7 +23,7 @@ type result struct {
 
 // Results is worker which saves results one by one in jsonl format
 func (f *Fuzzer) Results() {
-	fd, err := os.OpenFile(f.OutFile, os.O_WRONLY, 0644)
+	fd, err := os.OpenFile(f.OutFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		logger.Log.Error("error in opening out file",
 			zap.Error(err),

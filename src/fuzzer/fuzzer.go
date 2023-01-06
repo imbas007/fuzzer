@@ -131,7 +131,7 @@ func (f *Fuzzer) Start() {
 		zap.Duration("maxTime", f.MaxTime),
 	))
 
-	if f.MaxTime > 0 {
+	if f.MaxTime.Seconds() > 1 {
 		logger.Log.Warn("max time is defined. setting countdown",
 			zap.Duration("maxTime", f.MaxTime),
 		)
