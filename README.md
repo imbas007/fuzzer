@@ -6,10 +6,10 @@ Micro Web Fuzzer written in Go Lang.
 ## Features:
 - Multi threaded ✅
 - Filters:
-    http codes ✅
-    words ✅
-    lines ✅
-    size of body ✅
+    - http codes ✅
+    - words ✅
+    - lines ✅
+    - size of body ✅
 - Gracefoul shutdown ✅
 - Reuse HTTP connection, don't create every request new TCP connection ✅
 - Shuts down after maximum worktime ✅
@@ -21,7 +21,7 @@ Micro Web Fuzzer written in Go Lang.
 ## Use:
 
 Command line:
-``` Bash
+``` Go
 go run main.go \
     -maxReqSec 17 \
     -w wordlists/big.txt \
