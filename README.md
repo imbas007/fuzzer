@@ -1,4 +1,6 @@
 # README
+[![Go Report Card](https://goreportcard.com/badge/github.com/dpanic/fuzzer)](https://goreportcard.com/report/github.com/dpanic/fuzzer)
+
 Micro Web Fuzzer written in Go Lang.
 
 
