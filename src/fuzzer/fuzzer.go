@@ -110,7 +110,7 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.control = make(chan bool, fuzzer.maxWorkers+3)
 	fuzzer.startedAt = time.Now()
 	fuzzer.mutex = &sync.Mutex{}
-	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers)
+	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers*4)
 	fuzzer.burstyLimiter = make(chan bool, 1)
 	fuzzer.ExitChannel = make(chan string, 1)
 
@@ -158,7 +158,7 @@ func (f *Fuzzer) Start() {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
 
-		logger.Log.Warn("shutting down fan in",
+		logger.Log.Debug("shutting down fan in",
 			zap.Int("totalWorkers", f.totalWorkers),
 		)
 		f.totalWorkers--
@@ -214,6 +214,7 @@ func (f *Fuzzer) Start() {
 		if len(f.burstyLimiter) == 0 {
 			f.burstyLimiter <- true
 		}
+
 		if len(f.jobs) > 0 {
 			<-f.jobs
 		}
