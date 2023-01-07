@@ -2,7 +2,6 @@ package fuzzer
 
 import (
 	"encoding/json"
-	"fmt"
 	"fuzzer/src/logger"
 	"os"
 	"strconv"
@@ -70,7 +69,6 @@ func (f *Fuzzer) Results() {
 			continue
 		}
 
-		fmt.Println(r)
 		raw, _ := json.Marshal(r)
 		fd.WriteString(string(raw) + "\n")
 		fd.Sync()

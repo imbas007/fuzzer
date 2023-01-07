@@ -39,7 +39,7 @@ type Config struct {
 	ExitChannel   chan string
 
 	stats        stats
-	mutexStats   *sync.Mutex
+	statsQueue   chan string
 	totalWorkers int
 
 	startedAt time.Time
@@ -110,7 +110,7 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.control = make(chan bool, fuzzer.maxWorkers+3)
 	fuzzer.startedAt = time.Now()
 	fuzzer.mutex = &sync.Mutex{}
-	fuzzer.mutexStats = &sync.Mutex{}
+	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers)
 	fuzzer.burstyLimiter = make(chan bool, 1)
 	fuzzer.ExitChannel = make(chan string, 1)
 
@@ -141,6 +141,18 @@ func (f *Fuzzer) Start() {
 			f.ExitChannel <- "timeouted"
 		}()
 	}
+
+	go func() {
+		for {
+			time.Sleep(3 * time.Second)
+
+			if f.stats.Total == f.stats.Processed {
+				f.Stop()
+				f.ExitChannel <- "timeouted"
+				return
+			}
+		}
+	}()
 
 	defer func() {
 		f.mutex.Lock()
@@ -174,7 +186,6 @@ func (f *Fuzzer) Start() {
 	// count lines
 	for {
 		_, err := rd.ReadString('\n')
-		f.stats.Total++
 
 		if err != nil {
 			if err == io.EOF {
@@ -182,6 +193,8 @@ func (f *Fuzzer) Start() {
 			}
 			break
 		}
+
+		f.stats.Total++
 	}
 	fd.Seek(0, io.SeekStart)
 

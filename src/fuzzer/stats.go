@@ -19,15 +19,14 @@ type stats struct {
 }
 
 func (f *Fuzzer) PrintStats() {
-	f.mutexStats.Lock()
-	defer f.mutexStats.Unlock()
-
 	duration := time.Since(f.stats.LastPrint)
 	seconds := duration.Seconds()
 	processed := f.stats.Processed - f.stats.LastProcessed
 	reqPerSec := float64(processed) / float64(seconds)
 
 	logger.Log.Info("stats",
+		zap.String("url", f.URL),
+		zap.String("proxyURL", f.ProxyURL),
 		zap.Int("total", f.stats.Total),
 		zap.Int("processed", f.stats.Processed),
 		zap.Int("left", f.stats.Total-f.stats.Processed),
@@ -54,6 +53,22 @@ func (f *Fuzzer) Stats(interval time.Duration) {
 
 			f.totalWorkers--
 			return
+
+		case s := <-f.statsQueue:
+			switch s {
+			case "processed":
+				f.stats.Processed += 1
+
+			case "error":
+				f.stats.Errors += 1
+
+			case "saved":
+				f.stats.Saved += 1
+			}
+
+			if time.Since(f.stats.LastPrint) > interval {
+				f.PrintStats()
+			}
 
 		case <-time.After(interval):
 			f.PrintStats()

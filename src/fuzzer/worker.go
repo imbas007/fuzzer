@@ -58,9 +58,9 @@ func (f *Fuzzer) Worker(id int) {
 
 		res, statusCode, location, err := request.Do(j.URL, f.Method, nil)
 		if err != nil {
-			f.mutexStats.Lock()
-			f.stats.Errors += 1
-			f.mutexStats.Unlock()
+			f.statsQueue <- "error"
+			f.statsQueue <- "processed"
+			continue
 		}
 
 		lines := strings.Count(string(res), "\n")
@@ -73,17 +73,13 @@ func (f *Fuzzer) Worker(id int) {
 
 		size := len(res)
 
-		f.mutexStats.Lock()
-		f.stats.Processed += 1
-		f.mutexStats.Unlock()
+		f.statsQueue <- "processed"
 
 		if !f.filterResult(lines, words, size, statusCode) {
 			continue
 		}
 
-		f.mutexStats.Lock()
-		f.stats.Saved += 1
-		f.mutexStats.Unlock()
+		f.statsQueue <- "saved"
 
 		f.results <- result{
 			RedirectLocation: redirectLocation,

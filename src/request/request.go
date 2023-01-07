@@ -46,7 +46,7 @@ func init() {
 }
 
 const (
-	maxReadSize = 1 << 20
+	maxReadSize = 5 << 20
 )
 
 func Do(address, method string, body []byte) (result []byte, statusCode int, location string, err error) {
