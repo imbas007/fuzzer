@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fuzzer/src/logger"
+	"fuzzer/src/request"
 	"io"
 	"net/url"
 	"os"
@@ -72,7 +73,7 @@ func (f *Fuzzer) validate() (err error) {
 
 	// set proxy url
 	_, err = url.Parse(f.ProxyURL)
-	if err == nil {
+	if err != nil {
 		f.ProxyURL = ""
 	}
 	err = nil
@@ -113,6 +114,8 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers*4)
 	fuzzer.burstyLimiter = make(chan bool, 1)
 	fuzzer.ExitChannel = make(chan string, 1)
+
+	request.Setup(fuzzer.ProxyURL)
 
 	return
 }

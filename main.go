@@ -23,7 +23,7 @@ func main() {
 	outFile := flag.String("o", "", "/tmp/outFile.json")
 	wordList := flag.String("w", "", "wordlists/big.txt")
 	url := flag.String("u", "", "https://www.google.com/FUZZ")
-	proxyURL := flag.String("p", "", "https://10.106.0.2:1005")
+	proxyURL := flag.String("p", "", "http://127.0.0.1:9000")
 
 	flag.Parse()
 

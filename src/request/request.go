@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	"go.uber.org/zap"
@@ -19,11 +20,21 @@ var (
 	timeout = 20 * time.Second
 )
 
-func init() {
+func Setup(proxyURL string) {
+	var proxy func(*http.Request) (*url.URL, error)
+
+	if proxyURL != "" {
+		fixedURL, _ := url.Parse(proxyURL)
+		proxy = http.ProxyURL(fixedURL)
+		logger.Log.Debug("proxy url is set",
+			zap.String("proxyURL", proxyURL),
+		)
+	}
 
 	client = &http.Client{
 		Timeout: timeout,
 		Transport: &http.Transport{
+			Proxy: proxy,
 			DialContext: (&net.Dialer{
 				Timeout: 10 * time.Second,
 			}).DialContext,

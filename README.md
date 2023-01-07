@@ -17,10 +17,11 @@ Micro Web Fuzzer written in Go Lang.
 - Low memory footprint ✅
 - Save output in JSONL ✅
 - Maximum runtime, stop after reached ✅
+- Route through HTTP forwarding proxy ✅
 
 ## Todo:
+- Custom HTTP headers [ % ]
 - Set custom DNS resolver [ % ]
-- Route through HTTP Proxy [ % ]
 - Obey proxy 429 resposnes [ % ]
 - Slow down if being blocked [ % ]
 - Random user agent [ % ]
