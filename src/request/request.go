@@ -79,6 +79,7 @@ func Do(address, method string, body []byte) (result []byte, statusCode int, loc
 		log.Warn("error in client do",
 			zap.Error(err),
 		)
+		return
 	}
 	defer func() {
 		if resp != nil {
@@ -98,10 +99,7 @@ func Do(address, method string, body []byte) (result []byte, statusCode int, loc
 	}
 
 	if resp != nil {
-		loc, err := resp.Location()
-		if err == nil {
-			location = loc.String()
-		}
+		location = resp.Request.URL.String()
 		status = resp.Status
 		statusCode = resp.StatusCode
 	}
