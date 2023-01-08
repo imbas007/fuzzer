@@ -156,13 +156,16 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers*4)
 	fuzzer.burstyLimiter = make(chan bool, 1)
 	fuzzer.Done = make(chan string, 1)
-	fuzzer.Events = make(chan Event, 256)
+	fuzzer.Events = make(chan Event, 4096)
 
 	if fuzzer.Log == nil {
 		fuzzer.Log = logger.Log
 	}
 
 	request.Setup(fuzzer.ProxyURL)
+
+	fuzzer.totalWorkers = fuzzer.maxWorkers
+	fuzzer.totalWorkers += 3 // fanin + results worker
 
 	return
 }
@@ -209,18 +212,26 @@ func (f *Fuzzer) Start() {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
 
-		f.Log.Debug("shutting down fan in",
-			zap.Int("totalWorkers", f.totalWorkers),
-		)
+		if !f.IsSilent {
+			f.Log.Debug("shutting down fan in",
+				zap.Int("totalWorkers", f.totalWorkers),
+			)
+		}
 		f.totalWorkers--
 	}()
+
+	main := strings.ReplaceAll(f.URL, "FUZZ", "")
+	_, _, _, err := request.Do(main, f.Method, nil, f.Log)
+
+	if err != nil {
+		f.Log.Warn("error in connecting to main url of server")
+		return
+	}
 
 	// start workers
 	for i := 0; i < f.maxWorkers; i++ {
 		go f.Worker(i)
 	}
-	f.totalWorkers = f.maxWorkers
-	f.totalWorkers += 3 // fanin + results worker
 
 	// open wordlist
 	fd, err := os.OpenFile(f.WordList, os.O_RDONLY, os.ModePerm)

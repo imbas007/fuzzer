@@ -34,9 +34,11 @@ func (f *Fuzzer) saveResults() {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
 
-		f.Log.Debug("shutting down results worker",
-			zap.Int("totalWorkers", f.totalWorkers),
-		)
+		if !f.IsSilent {
+			f.Log.Debug("shutting down results worker",
+				zap.Int("totalWorkers", f.totalWorkers),
+			)
+		}
 
 		f.totalWorkers--
 	}()

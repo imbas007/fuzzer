@@ -29,7 +29,7 @@ func (f *Fuzzer) calculateStats() {
 
 	// add throughput
 	event := Event{
-		Type:  TypeThroughput,
+		Type:  EventTypeThroughput,
 		Value: fmt.Sprintf("%.2f / sec", reqPerSec),
 	}
 	select {
@@ -39,7 +39,7 @@ func (f *Fuzzer) calculateStats() {
 
 	// add progress
 	event = Event{
-		Type:  TypeProgress,
+		Type:  EventTypeProgress,
 		Value: fmt.Sprintf("%d / %d", f.stats.Processed, f.stats.Total),
 	}
 	select {
@@ -75,10 +75,11 @@ func (f *Fuzzer) printStats(interval time.Duration) {
 			f.mutex.Lock()
 			defer f.mutex.Unlock()
 
-			f.Log.Debug("shutting down stats",
-				zap.Int("totalWorkers", f.totalWorkers),
-			)
-
+			if !f.IsSilent {
+				f.Log.Debug("shutting down stats",
+					zap.Int("totalWorkers", f.totalWorkers),
+				)
+			}
 			f.totalWorkers--
 			return
 

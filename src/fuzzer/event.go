@@ -6,6 +6,7 @@ type Event struct {
 }
 
 const (
-	TypeProgress   = "progress"
-	TypeThroughput = "throughput"
+	EventTypeProgress   = "progress"
+	EventTypeThroughput = "throughput"
+	EventTypeError      = "error"
 )

@@ -50,6 +50,7 @@ func Setup(proxyURL string) {
 				InsecureSkipVerify: false,
 			},
 
+			DisableKeepAlives:   true,
 			MaxIdleConns:        1000,
 			MaxIdleConnsPerHost: 500,
 			MaxConnsPerHost:     500,
@@ -89,8 +90,7 @@ func Do(address, method string, body []byte, customLogger *zap.Logger) (result [
 
 	resp, err := client.Do(httpRequest)
 	if err != nil {
-		// avoid stack trace
-		log.Warn("error in client do",
+		log.Warn("error in client",
 			zap.Error(err),
 		)
 		return

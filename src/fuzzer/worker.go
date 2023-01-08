@@ -14,10 +14,12 @@ func (f *Fuzzer) Worker(id int) {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
 
-		f.Log.Warn("shutting down worker",
-			zap.Int("id", id),
-			zap.Int("totalWorkers", f.totalWorkers),
-		)
+		if !f.IsSilent {
+			f.Log.Warn("shutting down worker",
+				zap.Int("id", id),
+				zap.Int("totalWorkers", f.totalWorkers),
+			)
+		}
 
 		f.totalWorkers--
 	}()
@@ -69,6 +71,16 @@ func (f *Fuzzer) Worker(id int) {
 		if err != nil {
 			f.statsQueue <- "error"
 			f.statsQueue <- "processed"
+
+			event := Event{
+				Type:  EventTypeError,
+				Value: err.Error(),
+			}
+			select {
+			case f.Events <- event:
+			case <-time.After(10 * time.Millisecond):
+			}
+
 			continue
 		}
 
