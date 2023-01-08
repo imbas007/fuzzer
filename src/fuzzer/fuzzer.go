@@ -17,11 +17,11 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate easytags $GOFILE json:camel
 type Fuzzer struct {
 	Config
 }
 
-//go:generate easytags $GOFILE json:camel
 type Config struct {
 	URL       string        `json:"url"`
 	Method    string        `json:"method"`
@@ -32,19 +32,20 @@ type Config struct {
 	Filters   Filters       `json:"filters"`
 	ProxyURL  string        `json:"proxyURL"`
 
+	err         error
+	ExitChannel chan string `json:"exitChannel"`
+
 	maxWorkers    int
 	mutex         *sync.Mutex
 	results       chan Result
 	jobs          chan job
 	control       chan bool
 	burstyLimiter chan bool
-	ExitChannel   chan string
 
 	stats        stats
 	statsQueue   chan string
 	totalWorkers int
-
-	startedAt time.Time
+	startedAt    time.Time
 }
 
 type Filters struct {
@@ -143,6 +144,7 @@ func (f *Fuzzer) Start() {
 			<-time.After(f.MaxTime)
 			f.Stop()
 			f.ExitChannel <- "timeouted"
+			f.err = ErrMaxRuntime
 		}()
 	}
 
@@ -152,7 +154,7 @@ func (f *Fuzzer) Start() {
 
 			if f.stats.Total == f.stats.Processed {
 				f.Stop()
-				f.ExitChannel <- "timeouted"
+				f.ExitChannel <- "done"
 				return
 			}
 		}
@@ -181,6 +183,7 @@ func (f *Fuzzer) Start() {
 		log.Error("error in opening word list file",
 			zap.Error(err),
 		)
+		f.err = err
 		return
 	}
 	defer fd.Close()
@@ -282,7 +285,11 @@ func (f *Fuzzer) Start() {
 	}
 }
 
-func (f *Fuzzer) Wait() {
+func (f *Fuzzer) Wait() (err error) {
+	defer func() {
+		err = f.err
+	}()
+
 	for {
 		f.mutex.Lock()
 		if f.totalWorkers == 0 {
@@ -293,6 +300,7 @@ func (f *Fuzzer) Wait() {
 
 		time.Sleep(1 * time.Second)
 	}
+
 }
 
 // Stop sends intent to all workers to stop
