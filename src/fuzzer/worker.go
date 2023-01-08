@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dpanic/fuzzer/src/logger"
 	"github.com/dpanic/fuzzer/src/request"
 
 	"go.uber.org/zap"
@@ -15,7 +14,7 @@ func (f *Fuzzer) Worker(id int) {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
 
-		logger.Log.Warn("shutting down worker",
+		f.Log.Warn("shutting down worker",
 			zap.Int("id", id),
 			zap.Int("totalWorkers", f.totalWorkers),
 		)
@@ -53,11 +52,13 @@ func (f *Fuzzer) Worker(id int) {
 			continue
 		}
 
-		// logger.Log.Debug("received new job!",
-		// 	zap.String("url", j.URL),
-		// )
+		// if !f.IsSilent {
+		// 	logger.Log.Debug("received new job!",
+		// 		zap.String("url", j.URL),
+		// 	)
+		// }
 
-		res, statusCode, location, err := request.Do(j.URL, f.Method, nil)
+		res, statusCode, location, err := request.Do(j.URL, f.Method, nil, f.Log)
 		if err != nil {
 			f.statsQueue <- "error"
 			f.statsQueue <- "processed"

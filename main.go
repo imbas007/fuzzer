@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/dpanic/fuzzer/src/fuzzer"
-	"github.com/dpanic/fuzzer/src/logger"
 )
 
 func main() {
@@ -62,7 +61,7 @@ func main() {
 	go func() {
 		for {
 			s := <-signalChannel
-			logger.Log.Warn(fmt.Sprintf("received signal %s", s.String()))
+			f.Log.Warn(fmt.Sprintf("received signal %s", s.String()))
 
 			switch s {
 			case syscall.SIGHUP:

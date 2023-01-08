@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dpanic/fuzzer/src/logger"
-
 	"go.uber.org/zap"
 )
 
@@ -25,7 +23,7 @@ type Result struct {
 func (f *Fuzzer) saveResults() {
 	fd, err := os.OpenFile(f.OutFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		logger.Log.Error("error in opening out file",
+		f.Log.Error("error in opening out file",
 			zap.Error(err),
 		)
 		return
@@ -36,7 +34,7 @@ func (f *Fuzzer) saveResults() {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
 
-		logger.Log.Debug("shutting down results worker",
+		f.Log.Debug("shutting down results worker",
 			zap.Int("totalWorkers", f.totalWorkers),
 		)
 

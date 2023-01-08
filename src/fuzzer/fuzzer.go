@@ -40,10 +40,10 @@ type Config struct {
 
 	// MaxReqSec defines maximum requests per second for fuzzer
 	// if not set than no limits are applied
-	MaxReqSec int     `json:"maxReqSec"`
-	Filters   Filters `json:"filters"`
+	MaxReqSec int `json:"maxReqSec"`
 
 	// Filters perform filtering out of results per words, lines, size of body etc
+	Filters Filters `json:"filters"`
 
 	// ProxyURL defines HTTP forwarding proxy if set
 	ProxyURL string `json:"proxyURL"`
@@ -90,6 +90,9 @@ type Config struct {
 
 	// startedAt defines at which time fuzzer is started
 	startedAt time.Time
+
+	// Log you can define custom logger
+	Log *zap.Logger
 }
 
 // Validate validates input params
@@ -155,6 +158,10 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.Done = make(chan string, 1)
 	fuzzer.Events = make(chan Event, 256)
 
+	if fuzzer.Log == nil {
+		fuzzer.Log = logger.Log
+	}
+
 	request.Setup(fuzzer.ProxyURL)
 
 	return
@@ -165,7 +172,7 @@ type job struct {
 }
 
 func (f *Fuzzer) Start() {
-	log := logger.Log.WithOptions(zap.Fields(
+	log := f.Log.WithOptions(zap.Fields(
 		zap.String("url", f.URL),
 		zap.String("method", f.Method),
 		zap.String("wordList", f.WordList),
@@ -175,7 +182,7 @@ func (f *Fuzzer) Start() {
 	))
 
 	if f.MaxTime.Seconds() > 1 {
-		logger.Log.Warn("max time is defined. setting countdown",
+		f.Log.Warn("max time is defined. setting countdown",
 			zap.Duration("maxTime", f.MaxTime),
 		)
 		go func() {
@@ -202,7 +209,7 @@ func (f *Fuzzer) Start() {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
 
-		logger.Log.Debug("shutting down fan in",
+		f.Log.Debug("shutting down fan in",
 			zap.Int("totalWorkers", f.totalWorkers),
 		)
 		f.totalWorkers--
@@ -309,7 +316,11 @@ func (f *Fuzzer) Start() {
 			return
 		}
 
-		line = strings.Trim(line, "\n")
+		line = strings.ReplaceAll(line, "\r", "")
+		line = strings.ReplaceAll(line, "\n", "")
+		line = strings.ReplaceAll(line, "\t", "")
+		line = strings.Trim(line, " ")
+
 		u := strings.ReplaceAll(f.URL, "FUZZ", line)
 
 		// rate limit requests

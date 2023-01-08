@@ -61,16 +61,16 @@ const (
 	maxReadSize = 5 << 20
 )
 
-func Do(address, method string, body []byte) (result []byte, statusCode int, location string, err error) {
+func Do(address, method string, body []byte, customLogger *zap.Logger) (result []byte, statusCode int, location string, err error) {
 	var (
 		status string
 	)
-
-	log := logger.Log.WithOptions(zap.Fields(
+	log := customLogger.WithOptions(zap.Fields(
 		zap.String("address", address),
 		zap.String("method", method),
 		zap.Int("lenBody", len(body)),
-	))
+	),
+	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout+time.Duration(2)*time.Second)
 	defer cancel()

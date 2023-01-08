@@ -75,7 +75,7 @@ func (f *Fuzzer) printStats(interval time.Duration) {
 			f.mutex.Lock()
 			defer f.mutex.Unlock()
 
-			logger.Log.Debug("shutting down stats",
+			f.Log.Debug("shutting down stats",
 				zap.Int("totalWorkers", f.totalWorkers),
 			)
 

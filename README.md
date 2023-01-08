@@ -19,6 +19,7 @@ Micro Web Fuzzer written in Go Lang.
 - Maximum runtime, stop after reached ✅
 - Route through HTTP forwarding proxy ✅
 - Stream Events through buffered channel progress (it / total) and throughput (reqs / sec) ✅
+- Send custom zap Logger ✅
 
 ## Todo:
 - Custom HTTP headers [ % ]
