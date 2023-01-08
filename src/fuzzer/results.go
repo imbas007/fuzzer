@@ -21,8 +21,8 @@ type Result struct {
 	Words            int    `json:"words"`
 }
 
-// Results is worker which saves results one by one in jsonl format
-func (f *Fuzzer) Results() {
+// saveResults is worker which saves results one by one in jsonl format
+func (f *Fuzzer) saveResults() {
 	fd, err := os.OpenFile(f.OutFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		logger.Log.Error("error in opening out file",

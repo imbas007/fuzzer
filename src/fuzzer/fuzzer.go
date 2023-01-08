@@ -225,10 +225,10 @@ func (f *Fuzzer) Start() {
 	}()
 
 	// print stats
-	go f.Stats(3 * time.Second)
+	go f.printStats(3 * time.Second)
 
 	// start results
-	go f.Results()
+	go f.saveResults()
 
 	// enable limiter
 	if f.MaxReqSec > 0 {
@@ -282,7 +282,7 @@ func (f *Fuzzer) Start() {
 	}
 }
 
-func (f *Fuzzer) waitAllWorkers() {
+func (f *Fuzzer) Wait() {
 	for {
 		f.mutex.Lock()
 		if f.totalWorkers == 0 {
@@ -310,5 +310,5 @@ func (f *Fuzzer) Stop() {
 	// results stats
 	f.control <- true
 
-	f.waitAllWorkers()
+	f.Wait()
 }

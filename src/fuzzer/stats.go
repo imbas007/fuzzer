@@ -19,7 +19,7 @@ type stats struct {
 	Saved         int       `json:"saved"`
 }
 
-func (f *Fuzzer) PrintStats() {
+func (f *Fuzzer) GetCurrentStats() {
 	duration := time.Since(f.stats.LastPrint)
 	seconds := duration.Seconds()
 	processed := f.stats.Processed - f.stats.LastProcessed
@@ -41,7 +41,7 @@ func (f *Fuzzer) PrintStats() {
 	f.stats.LastProcessed = f.stats.Processed
 }
 
-func (f *Fuzzer) Stats(interval time.Duration) {
+func (f *Fuzzer) printStats(interval time.Duration) {
 	for {
 		select {
 		case <-f.control:
@@ -68,11 +68,11 @@ func (f *Fuzzer) Stats(interval time.Duration) {
 			}
 
 			if time.Since(f.stats.LastPrint) > interval {
-				f.PrintStats()
+				f.GetCurrentStats()
 			}
 
 		case <-time.After(interval):
-			f.PrintStats()
+			f.GetCurrentStats()
 		}
 	}
 }
