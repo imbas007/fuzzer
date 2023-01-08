@@ -67,18 +67,18 @@ func main() {
 			switch s {
 			case syscall.SIGHUP:
 			case syscall.SIGINT:
-				f.Exit <- "SIGINT"
+				f.Done <- "SIGINT"
 				return
 			case syscall.SIGTERM:
-				f.Exit <- "SIGTERM"
+				f.Done <- "SIGTERM"
 				return
 			case syscall.SIGQUIT:
-				f.Exit <- "SIGQUIT"
+				f.Done <- "SIGQUIT"
 				return
 			}
 		}
 	}()
 
-	<-f.Exit
+	<-f.Done
 	f.Stop()
 }

@@ -23,31 +23,73 @@ type Fuzzer struct {
 }
 
 type Config struct {
-	URL       string        `json:"url"`
-	Method    string        `json:"method"`
-	WordList  string        `json:"wordList"`
-	OutFile   string        `json:"outFile"`
-	MaxTime   time.Duration `json:"maxTime"`
-	MaxReqSec int           `json:"maxReqSec"`
-	Filters   Filters       `json:"filters"`
-	ProxyURL  string        `json:"proxyURL"`
-	IsSilent  bool          `json:"isSilent"`
+	// URL defines target for fuzzing
+	URL string `json:"url"`
 
-	err    error
-	Exit   chan string `json:"exit"`
-	Events chan Event  `json:"events"`
+	// Method defines which HTTP method should be used
+	Method string `json:"method"`
 
-	maxWorkers    int
-	mutex         *sync.Mutex
-	results       chan Result
-	jobs          chan job
-	control       chan bool
+	// WordList defines which word list should be used in fuzzing
+	WordList string `json:"wordList"`
+
+	// OutFile defines output of fuzzing process
+	OutFile string `json:"outFile"`
+
+	// MaxTime defines maximum runtime of fuzzer, if not set then indefinite
+	MaxTime time.Duration `json:"maxTime"`
+
+	// MaxReqSec defines maximum requests per second for fuzzer
+	// if not set than no limits are applied
+	MaxReqSec int     `json:"maxReqSec"`
+	Filters   Filters `json:"filters"`
+
+	// Filters perform filtering out of results per words, lines, size of body etc
+
+	// ProxyURL defines HTTP forwarding proxy if set
+	ProxyURL string `json:"proxyURL"`
+
+	// IsSilent defines should fuzzer perform detailed logging or not
+	IsSilent bool `json:"isSilent"`
+
+	// err is external error which will be returned by .Wait() method
+	err error
+
+	// Done channel is used for close initialized by command line
+	Done chan string `json:"exit"`
+
+	// Events sends events by fuzzer, which can be parsed by third party
+	Events chan Event `json:"events"`
+
+	// maxWorkers is used to determine maximum number of go routines
+	maxWorkers int
+	mutex      *sync.Mutex
+
+	// results is channel for streaming results, which is picked up by go routine and saved
+	// into external file
+	results chan Result
+
+	// jobs is channel for streaming new jobs red from wordlist
+	jobs chan job
+
+	// control channel is used for shutting down started go routines such as
+	// workers, fan in, stats, results
+	control chan bool
+
+	// burstyLimiter is channel used for creating ticks and by it controlling limit rate
+	// of fuzzer
 	burstyLimiter chan bool
 
-	stats        stats
-	statsQueue   chan string
+	// stats defines stats, total, processed, errors etc.
+	stats stats
+
+	// statsQueue is used for sending results to stats structure
+	statsQueue chan string
+
+	// totalWorkers is used to determine how many go routines are up and running
 	totalWorkers int
-	startedAt    time.Time
+
+	// startedAt defines at which time fuzzer is started
+	startedAt time.Time
 }
 
 // Validate validates input params
@@ -110,7 +152,7 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.mutex = &sync.Mutex{}
 	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers*4)
 	fuzzer.burstyLimiter = make(chan bool, 1)
-	fuzzer.Exit = make(chan string, 1)
+	fuzzer.Done = make(chan string, 1)
 	fuzzer.Events = make(chan Event, 256)
 
 	request.Setup(fuzzer.ProxyURL)
@@ -139,7 +181,7 @@ func (f *Fuzzer) Start() {
 		go func() {
 			<-time.After(f.MaxTime)
 			f.Stop()
-			f.Exit <- "timeouted"
+			f.Done <- "timeouted"
 			f.err = ErrMaxRuntime
 		}()
 	}
@@ -150,7 +192,7 @@ func (f *Fuzzer) Start() {
 
 			if f.stats.Total == f.stats.Processed {
 				f.Stop()
-				f.Exit <- "done"
+				f.Done <- "done"
 				return
 			}
 		}
