@@ -82,7 +82,7 @@ func (f *Fuzzer) Worker(id int) {
 
 		f.statsQueue <- "saved"
 
-		f.results <- result{
+		f.results <- Result{
 			RedirectLocation: redirectLocation,
 			URL:              j.URL,
 			Size:             size,

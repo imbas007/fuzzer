@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type result struct {
+type Result struct {
 	RedirectLocation string `json:"redirectLocation"`
 	URL              string `json:"url"`
 	Size             int    `json:"size"`
@@ -63,7 +63,7 @@ func (f *Fuzzer) Results() {
 		}
 		f.mutex.Unlock()
 
-		var r result
+		var r Result
 		select {
 		case r = <-f.results:
 		case <-time.After(3 * time.Second):

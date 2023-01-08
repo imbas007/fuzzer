@@ -34,7 +34,7 @@ type Config struct {
 
 	maxWorkers    int
 	mutex         *sync.Mutex
-	results       chan result
+	results       chan Result
 	jobs          chan job
 	control       chan bool
 	burstyLimiter chan bool
@@ -108,7 +108,7 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.maxWorkers = runtime.NumCPU()
 
 	fuzzer.jobs = make(chan job, 4096)
-	fuzzer.results = make(chan result, 4096)
+	fuzzer.results = make(chan Result, 4096)
 	fuzzer.control = make(chan bool, fuzzer.maxWorkers+3)
 	fuzzer.startedAt = time.Now()
 	fuzzer.mutex = &sync.Mutex{}
