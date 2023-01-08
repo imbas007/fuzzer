@@ -185,7 +185,7 @@ func (f *Fuzzer) Start() {
 	))
 
 	if f.MaxTime.Seconds() > 1 {
-		f.Log.Warn("max time is defined. setting countdown",
+		log.Warn("max time is defined. setting countdown",
 			zap.Duration("maxTime", f.MaxTime),
 		)
 		go func() {
@@ -213,7 +213,7 @@ func (f *Fuzzer) Start() {
 		defer f.mutex.Unlock()
 
 		if !f.IsSilent {
-			f.Log.Debug("shutting down fan in",
+			log.Debug("shutting down fan in",
 				zap.Int("totalWorkers", f.totalWorkers),
 			)
 		}
@@ -224,7 +224,7 @@ func (f *Fuzzer) Start() {
 	_, _, _, err := request.Do(main, f.Method, nil, f.Log)
 
 	if err != nil {
-		f.Log.Warn("error in connecting to main url of server")
+		log.Warn("error in connecting to main url of server")
 		return
 	}
 
