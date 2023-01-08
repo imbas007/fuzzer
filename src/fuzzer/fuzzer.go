@@ -184,6 +184,20 @@ func (f *Fuzzer) Start() {
 		zap.Duration("maxTime", f.MaxTime),
 	))
 
+	// check main url
+	main := strings.ReplaceAll(f.URL, "FUZZ", "")
+	_, _, _, err := request.Do(main, f.Method, nil, f.Log)
+
+	if err != nil {
+		log.Warn("error in connecting to main url of server")
+		f.Done <- "error in connecting to main url"
+
+		// not proud of this, but for now leave it
+		f.totalWorkers = 0
+		return
+	}
+
+	// max runtime go routine
 	if f.MaxTime.Seconds() > 1 {
 		log.Warn("max time is defined. setting countdown",
 			zap.Duration("maxTime", f.MaxTime),
@@ -196,6 +210,7 @@ func (f *Fuzzer) Start() {
 		}()
 	}
 
+	// wait until is done
 	go func() {
 		for {
 			time.Sleep(3 * time.Second)
@@ -208,6 +223,7 @@ func (f *Fuzzer) Start() {
 		}
 	}()
 
+	// shutdown fan in
 	defer func() {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
@@ -219,14 +235,6 @@ func (f *Fuzzer) Start() {
 		}
 		f.totalWorkers--
 	}()
-
-	main := strings.ReplaceAll(f.URL, "FUZZ", "")
-	_, _, _, err := request.Do(main, f.Method, nil, f.Log)
-
-	if err != nil {
-		log.Warn("error in connecting to main url of server")
-		return
-	}
 
 	// start workers
 	for i := 0; i < f.maxWorkers; i++ {
