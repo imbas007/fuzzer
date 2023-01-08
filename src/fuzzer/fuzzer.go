@@ -3,8 +3,6 @@ package fuzzer
 import (
 	"bufio"
 	"errors"
-	"fuzzer/src/logger"
-	"fuzzer/src/request"
 	"io"
 	"net/url"
 	"os"
@@ -12,6 +10,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/dpanic/fuzzer/src/logger"
+	"github.com/dpanic/fuzzer/src/request"
 
 	"go.uber.org/zap"
 )

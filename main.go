@@ -3,12 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"fuzzer/src/fuzzer"
-	"fuzzer/src/logger"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/dpanic/fuzzer/src/fuzzer"
+	"github.com/dpanic/fuzzer/src/logger"
 )
 
 func main() {

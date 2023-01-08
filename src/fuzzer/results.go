@@ -2,11 +2,12 @@ package fuzzer
 
 import (
 	"encoding/json"
-	"fuzzer/src/logger"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dpanic/fuzzer/src/logger"
 
 	"go.uber.org/zap"
 )

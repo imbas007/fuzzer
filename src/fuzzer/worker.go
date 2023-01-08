@@ -1,10 +1,11 @@
 package fuzzer
 
 import (
-	"fuzzer/src/logger"
-	"fuzzer/src/request"
 	"strings"
 	"time"
+
+	"github.com/dpanic/fuzzer/src/logger"
+	"github.com/dpanic/fuzzer/src/request"
 
 	"go.uber.org/zap"
 )

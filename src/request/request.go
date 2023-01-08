@@ -5,12 +5,13 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"fuzzer/src/logger"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/dpanic/fuzzer/src/logger"
 
 	"go.uber.org/zap"
 )

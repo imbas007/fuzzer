@@ -1,8 +1,9 @@
 package fuzzer
 
 import (
-	"fuzzer/src/logger"
 	"time"
+
+	"github.com/dpanic/fuzzer/src/logger"
 
 	"go.uber.org/zap"
 )
