@@ -64,8 +64,10 @@ const (
 func Do(address, method string, body []byte, customLogger *zap.Logger) (result []byte, statusCode int, location string, err error) {
 	var (
 		status string
+		log    *zap.Logger
 	)
-	log := customLogger.WithOptions(zap.Fields(
+
+	log = customLogger.WithOptions(zap.Fields(
 		zap.String("address", address),
 		zap.String("method", method),
 		zap.Int("lenBody", len(body)),
@@ -129,6 +131,7 @@ func Do(address, method string, body []byte, customLogger *zap.Logger) (result [
 		if n == 0 {
 			err = nil
 		} else {
+
 			log.Error("error in processing response",
 				zap.Error(err),
 				zap.Int("downloadedBytes", n),

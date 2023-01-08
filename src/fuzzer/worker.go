@@ -58,7 +58,14 @@ func (f *Fuzzer) Worker(id int) {
 		// 	)
 		// }
 
-		res, statusCode, location, err := request.Do(j.URL, f.Method, nil, f.Log)
+		var (
+			res        []byte
+			statusCode int
+			location   string
+			err        error
+		)
+		res, statusCode, location, err = request.Do(j.URL, f.Method, nil, f.Log)
+
 		if err != nil {
 			f.statsQueue <- "error"
 			f.statsQueue <- "processed"
