@@ -31,9 +31,11 @@ type Config struct {
 	MaxReqSec int           `json:"maxReqSec"`
 	Filters   Filters       `json:"filters"`
 	ProxyURL  string        `json:"proxyURL"`
+	IsSilent  bool          `json:"isSilent"`
 
-	err         error
-	ExitChannel chan string `json:"exitChannel"`
+	err    error
+	Exit   chan string `json:"exit"`
+	Events chan Event  `json:"events"`
 
 	maxWorkers    int
 	mutex         *sync.Mutex
@@ -46,13 +48,6 @@ type Config struct {
 	statsQueue   chan string
 	totalWorkers int
 	startedAt    time.Time
-}
-
-type Filters struct {
-	StatusCodes []int `json:"statusCodes"`
-	Words       []int `json:"words"`
-	Lines       []int `json:"lines"`
-	Size        []int `json:"size"`
 }
 
 // Validate validates input params
@@ -115,7 +110,8 @@ func New(config *Config) (fuzzer *Fuzzer, err error) {
 	fuzzer.mutex = &sync.Mutex{}
 	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers*4)
 	fuzzer.burstyLimiter = make(chan bool, 1)
-	fuzzer.ExitChannel = make(chan string, 1)
+	fuzzer.Exit = make(chan string, 1)
+	fuzzer.Events = make(chan Event, 256)
 
 	request.Setup(fuzzer.ProxyURL)
 
@@ -143,7 +139,7 @@ func (f *Fuzzer) Start() {
 		go func() {
 			<-time.After(f.MaxTime)
 			f.Stop()
-			f.ExitChannel <- "timeouted"
+			f.Exit <- "timeouted"
 			f.err = ErrMaxRuntime
 		}()
 	}
@@ -154,7 +150,7 @@ func (f *Fuzzer) Start() {
 
 			if f.stats.Total == f.stats.Processed {
 				f.Stop()
-				f.ExitChannel <- "done"
+				f.Exit <- "done"
 				return
 			}
 		}

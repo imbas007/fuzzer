@@ -1,5 +1,12 @@
 package fuzzer
 
+type Filters struct {
+	StatusCodes []int `json:"statusCodes"`
+	Words       []int `json:"words"`
+	Lines       []int `json:"lines"`
+	Size        []int `json:"size"`
+}
+
 func (f *Fuzzer) filterResult(lines, words, size, statusCode int) (res bool) {
 
 	for _, c := range f.Filters.StatusCodes {

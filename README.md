@@ -18,6 +18,7 @@ Micro Web Fuzzer written in Go Lang.
 - Save output in JSONL ✅
 - Maximum runtime, stop after reached ✅
 - Route through HTTP forwarding proxy ✅
+- Stream Events through buffered channel progress (it / total) and throughput (reqs / sec) ✅
 
 ## Todo:
 - Custom HTTP headers [ % ]

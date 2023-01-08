@@ -1,6 +1,7 @@
 package fuzzer
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/dpanic/fuzzer/src/logger"
@@ -11,34 +12,60 @@ import (
 //go:generate easytags $GOFILE json:camel
 
 type stats struct {
-	LastPrint     time.Time `json:"lastPrint"`
-	LastProcessed int       `json:"lastProcessed"`
-	Total         int       `json:"total"`
-	Processed     int       `json:"processed"`
-	Errors        int       `json:"errors"`
-	Saved         int       `json:"saved"`
+	LastCalculated time.Time `json:"lastCalculated"`
+	LastProcessed  int       `json:"lastProcessed"`
+	ReqPerSec      float64   `json:"reqPerSec"`
+	Total          int       `json:"total"`
+	Processed      int       `json:"processed"`
+	Errors         int       `json:"errors"`
+	Saved          int       `json:"saved"`
 }
 
-func (f *Fuzzer) GetCurrentStats() {
-	duration := time.Since(f.stats.LastPrint)
+func (f *Fuzzer) calculateStats() {
+	duration := time.Since(f.stats.LastCalculated)
 	seconds := duration.Seconds()
 	processed := f.stats.Processed - f.stats.LastProcessed
 	reqPerSec := float64(processed) / float64(seconds)
 
-	logger.Log.Info("stats",
-		zap.String("url", f.URL),
-		zap.String("proxyURL", f.ProxyURL),
-		zap.Int("total", f.stats.Total),
-		zap.Int("processed", f.stats.Processed),
-		zap.Int("left", f.stats.Total-f.stats.Processed),
-		zap.Int("saved", f.stats.Saved),
-		zap.Int("errors", f.stats.Errors),
-		zap.Float64("req/s", reqPerSec),
-		zap.Duration("runtime", time.Since(f.startedAt)),
-	)
+	// add throughput
+	event := Event{
+		Type:  "throughput",
+		Value: fmt.Sprintf("%.2f / sec", reqPerSec),
+	}
+	select {
+	case f.Events <- event:
+	case <-time.After(10 * time.Millisecond):
+	}
 
-	f.stats.LastPrint = time.Now()
+	// add progress
+	event = Event{
+		Type:  "progress",
+		Value: fmt.Sprintf("%d / %d", f.stats.Processed, f.stats.Total),
+	}
+	select {
+	case f.Events <- event:
+	case <-time.After(10 * time.Millisecond):
+	}
+
+	f.stats.ReqPerSec = reqPerSec
+	f.stats.LastCalculated = time.Now()
 	f.stats.LastProcessed = f.stats.Processed
+}
+
+func (f *Fuzzer) PrintStats() {
+	if !f.IsSilent {
+		logger.Log.Info("stats",
+			zap.String("url", f.URL),
+			zap.String("proxyURL", f.ProxyURL),
+			zap.Int("total", f.stats.Total),
+			zap.Int("processed", f.stats.Processed),
+			zap.Int("left", f.stats.Total-f.stats.Processed),
+			zap.Int("saved", f.stats.Saved),
+			zap.Int("errors", f.stats.Errors),
+			zap.Float64("req/s", f.stats.ReqPerSec),
+			zap.Duration("runtime", time.Since(f.startedAt)),
+		)
+	}
 }
 
 func (f *Fuzzer) printStats(interval time.Duration) {
@@ -67,12 +94,14 @@ func (f *Fuzzer) printStats(interval time.Duration) {
 				f.stats.Saved += 1
 			}
 
-			if time.Since(f.stats.LastPrint) > interval {
-				f.GetCurrentStats()
+			if time.Since(f.stats.LastCalculated) > interval {
+				f.calculateStats()
+				f.PrintStats()
 			}
 
 		case <-time.After(interval):
-			f.GetCurrentStats()
+			f.calculateStats()
+			f.PrintStats()
 		}
 	}
 }
