@@ -29,7 +29,7 @@ func (f *Fuzzer) calculateStats() {
 
 	// add throughput
 	event := Event{
-		Type:  "throughput",
+		Type:  TypeThroughput,
 		Value: fmt.Sprintf("%.2f / sec", reqPerSec),
 	}
 	select {
@@ -39,7 +39,7 @@ func (f *Fuzzer) calculateStats() {
 
 	// add progress
 	event = Event{
-		Type:  "progress",
+		Type:  TypeProgress,
 		Value: fmt.Sprintf("%d / %d", f.stats.Processed, f.stats.Total),
 	}
 	select {

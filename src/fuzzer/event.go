@@ -1,6 +1,11 @@
 package fuzzer
 
 type Event struct {
-	Type string
+	Type  string
 	Value string
 }
+
+const (
+	TypeProgress   = "progress"
+	TypeThroughput = "throughput"
+)
