@@ -18,13 +18,18 @@ Micro Web Fuzzer written in Go Lang.
 - Save output in JSONL ✅
 - Maximum runtime, stop after reached ✅
 - Route through HTTP forwarding proxy ✅
-- Stream Events through buffered channel progress (it / total) and throughput (reqs / sec) ✅
-- Send custom zap Logger ✅
+- Stream Events through buffered channel:
+    - progress (it / total) ✅
+    - throughput (reqs / sec) ✅
+    - errors ✅
+- Set custom zap Logger ✅
+
+## Priority Todo:
+- Obey 429 respones [ % ]
 
 ## Todo:
 - Custom HTTP headers [ % ]
 - Set custom DNS resolver [ % ]
-- Obey proxy 429 resposnes [ % ]
 - Slow down if being blocked [ % ]
 - Random user agent [ % ]
 - Random wait between requests [ % ]

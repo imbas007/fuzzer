@@ -29,8 +29,9 @@ func (f *Fuzzer) calculateStats() {
 
 	// add throughput
 	event := Event{
-		Type:  EventTypeThroughput,
-		Value: fmt.Sprintf("%.2f / sec", reqPerSec),
+		Type:        EventTypeThroughput,
+		Description: fmt.Sprintf("%.2f / sec", reqPerSec),
+		Value:       reqPerSec,
 	}
 	select {
 	case f.Events <- event:
@@ -39,8 +40,8 @@ func (f *Fuzzer) calculateStats() {
 
 	// add progress
 	event = Event{
-		Type:  EventTypeProgress,
-		Value: fmt.Sprintf("%d / %d", f.stats.Processed, f.stats.Total),
+		Type:        EventTypeProgress,
+		Description: fmt.Sprintf("%d / %d", f.stats.Processed, f.stats.Total),
 	}
 	select {
 	case f.Events <- event:
