@@ -206,7 +206,7 @@ func (f *Fuzzer) Start() {
 			<-time.After(f.MaxTime)
 			f.Stop()
 			f.Done <- "timeouted"
-			f.err = ErrMaxRuntime
+			f.setError(ErrMaxRuntime)
 		}()
 	}
 
@@ -247,7 +247,7 @@ func (f *Fuzzer) Start() {
 		log.Error("error in opening word list file",
 			zap.Error(err),
 		)
-		f.err = err
+		f.setError(err)
 		return
 	}
 	defer fd.Close()
@@ -355,6 +355,7 @@ func (f *Fuzzer) Start() {
 
 func (f *Fuzzer) Wait() (err error) {
 	defer func() {
+		f.setError(f.err)
 		err = f.err
 	}()
 
@@ -368,7 +369,13 @@ func (f *Fuzzer) Wait() (err error) {
 
 		time.Sleep(1 * time.Second)
 	}
+}
 
+func (f *Fuzzer) setError(err error) {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	f.err = err
 }
 
 // Stop sends intent to all workers to stop
