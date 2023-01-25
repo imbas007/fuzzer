@@ -186,11 +186,13 @@ func (f *Fuzzer) Start() {
 
 	// check main url
 	main := strings.ReplaceAll(f.URL, "FUZZ", "")
-	_, _, _, err := request.Do(main, f.Method, nil, f.Log)
+	_, statusCode, _, err := request.Do(main, f.Method, nil, f.Log)
 
-	if err != nil {
-		log.Warn("error in connecting to main url of server")
-		f.Done <- "error in connecting to main url"
+	if err != nil && statusCode != 0 {
+		err = errors.New("error in connecting to main url of server")
+		log.Warn(err.Error())
+		f.Done <- err.Error()
+		f.setError(err)
 
 		// not proud of this, but for now leave it
 		f.totalWorkers = 0
