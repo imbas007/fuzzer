@@ -90,9 +90,11 @@ func Do(address, method string, body []byte, customLogger *zap.Logger) (result [
 
 	resp, err := client.Do(httpRequest)
 	if err != nil {
-		log.Warn("error in client",
-			zap.Error(err),
-		)
+		if resp != nil && resp.StatusCode != http.StatusNotFound {
+			log.Warn("error in client",
+				zap.Error(err),
+			)
+		}
 		return
 	}
 	defer func() {
