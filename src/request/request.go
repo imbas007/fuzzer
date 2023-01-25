@@ -47,7 +47,7 @@ func Setup(proxyURL string) {
 
 			TLSHandshakeTimeout: 5 * time.Second,
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
+				InsecureSkipVerify: true,
 			},
 
 			DisableKeepAlives:   true,
