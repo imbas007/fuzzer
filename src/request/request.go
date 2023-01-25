@@ -62,7 +62,7 @@ const (
 	maxReadSize = 5 << 20
 )
 
-func Do(address, method string, body []byte, customLogger *zap.Logger) (result []byte, statusCode int, location string, err error) {
+func Do(address, method string, body []byte, headers http.Header, customLogger *zap.Logger) (result []byte, statusCode int, location string, err error) {
 	var (
 		status string
 		log    *zap.Logger
@@ -79,6 +79,10 @@ func Do(address, method string, body []byte, customLogger *zap.Logger) (result [
 	defer cancel()
 
 	httpRequest, err := http.NewRequestWithContext(ctx, method, address, bytes.NewBuffer(body))
+
+	if headers != nil {
+		httpRequest.Header = headers
+	}
 
 	if err != nil {
 		// avoid stack trace

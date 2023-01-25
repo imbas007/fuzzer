@@ -1,6 +1,7 @@
 package fuzzer
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -65,8 +66,20 @@ func (f *Fuzzer) Worker(id int) {
 			statusCode int
 			location   string
 			err        error
+			url        string
 		)
-		res, statusCode, location, err = request.Do(j.URL, f.Method, nil, f.Log)
+
+		url = j.URL
+		headers := request.GetHeaders()
+
+		if f.PreExecuteRequestTransform != nil {
+			fmt.Println(111)
+			(f.PreExecuteRequestTransform)(&url, &f.ProxyURL, &headers)
+		}
+
+		fmt.Println(url, headers)
+
+		res, statusCode, location, err = request.Do(url, f.Method, nil, headers, f.Log)
 
 		if err != nil {
 			f.statsQueue <- "error"
@@ -88,7 +101,7 @@ func (f *Fuzzer) Worker(id int) {
 		words := strings.Count(string(res), " ")
 
 		redirectLocation := ""
-		if location != j.URL {
+		if location != url {
 			redirectLocation = location
 		}
 

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"runtime"
@@ -50,6 +51,8 @@ type Config struct {
 
 	// IsSilent defines should fuzzer perform detailed logging or not
 	IsSilent bool `json:"isSilent"`
+
+	PreExecuteRequestTransform func(targetURL, proxyURL *string, headers *http.Header)
 
 	// err is external error which will be returned by .Wait() method
 	err error
@@ -136,36 +139,36 @@ func (f *Fuzzer) validate() (err error) {
 }
 
 // New generates basic new instance of Fuzzer
-func New(config *Config) (fuzzer *Fuzzer, err error) {
-	fuzzer = &Fuzzer{
+func New(config *Config) (f *Fuzzer, err error) {
+	f = &Fuzzer{
 		*config,
 	}
 
-	err = fuzzer.validate()
+	err = f.validate()
 	if err != nil {
 		return
 	}
 
-	fuzzer.maxWorkers = runtime.NumCPU()
+	f.maxWorkers = runtime.NumCPU()
 
-	fuzzer.jobs = make(chan job, 4096)
-	fuzzer.results = make(chan Result, 4096)
-	fuzzer.control = make(chan bool, fuzzer.maxWorkers+3)
-	fuzzer.startedAt = time.Now()
-	fuzzer.mutex = &sync.Mutex{}
-	fuzzer.statsQueue = make(chan string, fuzzer.maxWorkers*4)
-	fuzzer.burstyLimiter = make(chan bool, 1)
-	fuzzer.Done = make(chan string, 1)
-	fuzzer.Events = make(chan Event, 4096)
+	f.jobs = make(chan job, 4096)
+	f.results = make(chan Result, 4096)
+	f.control = make(chan bool, f.maxWorkers+3)
+	f.startedAt = time.Now()
+	f.mutex = &sync.Mutex{}
+	f.statsQueue = make(chan string, f.maxWorkers*4)
+	f.burstyLimiter = make(chan bool, 1)
+	f.Done = make(chan string, 1)
+	f.Events = make(chan Event, 4096)
 
-	if fuzzer.Log == nil {
-		fuzzer.Log = logger.Log
+	if f.Log == nil {
+		f.Log = logger.Log
 	}
 
-	request.Setup(fuzzer.ProxyURL)
+	request.Setup(f.ProxyURL)
 
-	fuzzer.totalWorkers = fuzzer.maxWorkers
-	fuzzer.totalWorkers += 3 // fanin + results worker
+	f.totalWorkers = f.maxWorkers
+	f.totalWorkers += 3 // fanin + results worker
 
 	return
 }
@@ -186,7 +189,7 @@ func (f *Fuzzer) Start() {
 
 	// check main url
 	main := strings.ReplaceAll(f.URL, "FUZZ", "")
-	_, statusCode, _, err := request.Do(main, f.Method, nil, f.Log)
+	_, statusCode, _, err := request.Do(main, f.Method, nil, nil, f.Log)
 
 	if err != nil && statusCode != 0 {
 		err = errors.New("error in connecting to main url of server")

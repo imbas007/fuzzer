@@ -23,6 +23,7 @@ Micro Web Fuzzer written in Go Lang.
     - throughput (reqs / sec) ✅
     - errors ✅
 - Set custom zap Logger ✅
+- Set custom pre request URL and Proxy URL transfrom ✅
 
 ## Priority Todo:
 - Obey 429 respones [ % ]
@@ -109,3 +110,14 @@ go func() {
 f.Stop()
 ```
 
+
+Custom Proxy URL transform
+``` Go
+f.PreExecuteRequestTransform = func (jobURL *string, proxyURL *string, headers *http.Header) {
+	(*headers)["Target"] = []string{
+		*jobURL,
+	}
+
+	*jobURL = *proxyURL
+}
+```
