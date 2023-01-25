@@ -1,7 +1,6 @@
 package fuzzer
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -73,11 +72,8 @@ func (f *Fuzzer) Worker(id int) {
 		headers := request.GetHeaders()
 
 		if f.PreExecuteRequestTransform != nil {
-			fmt.Println(111)
 			(f.PreExecuteRequestTransform)(&url, &f.ProxyURL, &headers)
 		}
-
-		fmt.Println(url, headers)
 
 		res, statusCode, location, err = request.Do(url, f.Method, nil, headers, f.Log)
 
