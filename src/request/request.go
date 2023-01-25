@@ -107,11 +107,36 @@ func Do(address, method string, body []byte, customLogger *zap.Logger) (result [
 		return
 	}
 
-	result = make([]byte, maxReadSize)
-	n, err := io.ReadFull(resp.Body, result)
+	// Read only maxSize
+	result = make([]byte, 0, 256<<10)
+	buf := make([]byte, 4096)
+	var n int
 
-	if n == maxReadSize {
-		err = errors.New("file limit has reached")
+	for {
+		n, err = resp.Body.Read(buf)
+
+		if n > 0 {
+			buf = buf[:n]
+			result = append(result, buf...)
+
+			if len(result) > maxReadSize<<20 {
+				result = result[:maxReadSize<<20]
+				err = errors.New("file limit has reached")
+				break
+			}
+		}
+
+		if err != nil && err != io.EOF {
+			break
+		}
+
+		if err == io.EOF {
+			break
+		}
+	}
+
+	if err == io.ErrUnexpectedEOF || err == io.EOF {
+		err = nil
 	}
 
 	if resp != nil {
