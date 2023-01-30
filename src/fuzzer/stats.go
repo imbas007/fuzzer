@@ -64,7 +64,7 @@ func (f *Fuzzer) PrintStats() {
 			zap.Int("saved", f.stats.Saved),
 			zap.Int("errors", f.stats.Errors),
 			zap.Float64("req/s", f.stats.ReqPerSec),
-			zap.Duration("runtime", time.Since(f.startedAt)),
+			zap.Duration("runtime", time.Since(f.Started)),
 		)
 	}
 }

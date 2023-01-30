@@ -52,7 +52,7 @@ type Config struct {
 	// IsSilent defines should fuzzer perform detailed logging or not
 	IsSilent bool `json:"isSilent"`
 
-	PreExecuteRequestTransform func(targetURL, proxyURL *string, headers *http.Header)
+	PreExecuteRequestTransform func(targetURL, proxyURL *string, headers *http.Header) `json:"preExecuteRequestTransform"`
 
 	// err is external error which will be returned by .Wait() method
 	err error
@@ -91,11 +91,11 @@ type Config struct {
 	// totalWorkers is used to determine how many go routines are up and running
 	totalWorkers int
 
-	// startedAt defines at which time fuzzer is started
-	startedAt time.Time
+	// Started defines at which time fuzzer is started
+	Started time.Time
 
 	// Log you can define custom logger
-	Log *zap.Logger
+	Log *zap.Logger `json:"log"`
 }
 
 // Validate validates input params
@@ -154,7 +154,7 @@ func New(config *Config) (f *Fuzzer, err error) {
 	f.jobs = make(chan job, 4096)
 	f.results = make(chan Result, 4096)
 	f.control = make(chan bool, f.maxWorkers+3)
-	f.startedAt = time.Now()
+	f.Started = time.Now()
 	f.mutex = &sync.Mutex{}
 	f.statsQueue = make(chan string, f.maxWorkers*4)
 	f.burstyLimiter = make(chan bool, 1)
