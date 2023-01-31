@@ -42,6 +42,7 @@ func (f *Fuzzer) calculateStats() {
 	event = Event{
 		Type:        EventTypeProgress,
 		Description: fmt.Sprintf("%d / %d", f.stats.Processed, f.stats.Total),
+		Value:       f.stats.Processed,
 	}
 	select {
 	case f.Events <- event:
