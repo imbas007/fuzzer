@@ -23,6 +23,8 @@ type Result struct {
 func (f *Fuzzer) saveResults() {
 	fd, err := os.OpenFile(f.OutFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
+		f.totalWorkers--
+
 		f.Log.Error("error in opening out file",
 			zap.Error(err),
 		)
