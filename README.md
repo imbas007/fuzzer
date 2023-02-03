@@ -24,6 +24,8 @@ Micro Web Fuzzer written in Go Lang.
     - errors ✅
 - Set custom zap Logger ✅
 - Set custom pre request URL and Proxy URL transfrom ✅
+- Set custom user agent ✅
+- Pseudo random user agent, appends suffix to user agent ✅
 
 ## Priority Todo:
 - Obey 429 respones [ % ]
@@ -32,7 +34,6 @@ Micro Web Fuzzer written in Go Lang.
 - Custom HTTP headers [ % ]
 - Set custom DNS resolver [ % ]
 - Slow down if being blocked [ % ]
-- Random user agent [ % ]
 - Random wait between requests [ % ]
 
 
@@ -47,6 +48,8 @@ go run main.go \
     -w wordlists/big.txt \
     -u https://google.com/FUZZ \
     -fc 403,404 \
+    -ua "custom user agent" \
+    -prua true \
     -maxTime 120 \
     -o tmp/test.json \
     -X GET
@@ -55,20 +58,22 @@ go run main.go \
 As a lib:
 ``` Go
 f, err := fuzzer.New(&fuzzer.Config{
-		URL:       *url,
-		Method:    *method,
-		ProxyURL:  *proxyURL,
-		OutFile:   *outFile,
-		WordList:  *wordList,
-		MaxTime:   time.Duration(*maxTime) * time.Second,
-		MaxReqSec: *maxReqSec,
-		Filters: fuzzer.Filters{
-			StatusCodes: fuzzer.GetUniqueNumbers(*filterCodes, ","),
-			Words:       fuzzer.GetUniqueNumbers(*filterWords, ","),
-			Lines:       fuzzer.GetUniqueNumbers(*filterLines, ","),
-			Size:        fuzzer.GetUniqueNumbers(*filterSize, ","),
-		},
-	})
+        URL:       *url,
+        Method:    *method,
+        ProxyURL:  *proxyURL,
+        OutFile:   *outFile,
+        WordList:  *wordList,
+        MaxTime:   time.Duration(*maxTime) * time.Second,
+        UserAgent:             *userAgent,
+        PseudoRandomUserAgent: *pseudoRandomUserAgent,
+        MaxReqSec: *maxReqSec,
+        Filters: fuzzer.Filters{
+            StatusCodes: fuzzer.GetUniqueNumbers(*filterCodes, ","),
+            Words:       fuzzer.GetUniqueNumbers(*filterWords, ","),
+            Lines:       fuzzer.GetUniqueNumbers(*filterLines, ","),
+            Size:        fuzzer.GetUniqueNumbers(*filterSize, ","),
+        },
+    })
 
 if err != nil {
     flag.PrintDefaults()

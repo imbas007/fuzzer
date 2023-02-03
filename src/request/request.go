@@ -88,6 +88,13 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 
 	httpRequest, err := http.NewRequestWithContext(ctx, method, address, bytes.NewBuffer(body))
 
+	if err != nil {
+		log.Error("error in creating request",
+			zap.Error(err),
+		)
+		return
+	}
+
 	if headers != nil {
 		httpRequest.Header = headers
 	}

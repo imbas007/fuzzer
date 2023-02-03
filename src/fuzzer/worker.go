@@ -70,6 +70,10 @@ func (f *Fuzzer) Worker(id int) {
 
 		url = j.URL
 		headers := request.GetHeaders()
+		ua := request.GetUserAgent(f.UserAgent, f.PseudoRandomUserAgent)
+		headers["user-agent"] = []string{
+			ua,
+		}
 
 		if f.PreExecuteRequestTransform != nil {
 			(f.PreExecuteRequestTransform)(&url, &f.ProxyURL, &headers)

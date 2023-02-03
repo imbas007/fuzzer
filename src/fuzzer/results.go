@@ -24,6 +24,7 @@ func (f *Fuzzer) saveResults() {
 	fd, err := os.OpenFile(f.OutFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		f.totalWorkers--
+		fd.Sync()
 
 		f.Log.Error("error in opening out file",
 			zap.Error(err),
@@ -74,7 +75,6 @@ func (f *Fuzzer) saveResults() {
 
 		raw, _ := json.Marshal(r)
 		fd.WriteString(string(raw) + "\n")
-		fd.Sync()
 	}
 }
 

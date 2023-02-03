@@ -7,4 +7,6 @@ go run main.go \
     -u http://www.google.com/FUZZ \
     -fc 403,404 \
     -o tmp/standard.json \
+    -ua "custom agent" \
+    -prua true \
     -X GET

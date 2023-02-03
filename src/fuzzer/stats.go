@@ -35,7 +35,7 @@ func (f *Fuzzer) calculateStats() {
 	}
 	select {
 	case f.Events <- event:
-	case <-time.After(10 * time.Millisecond):
+	case <-time.After(2 * time.Millisecond):
 	}
 
 	// add progress
@@ -46,7 +46,7 @@ func (f *Fuzzer) calculateStats() {
 	}
 	select {
 	case f.Events <- event:
-	case <-time.After(10 * time.Millisecond):
+	case <-time.After(2 * time.Millisecond):
 	}
 
 	f.stats.ReqPerSec = reqPerSec
@@ -66,6 +66,7 @@ func (f *Fuzzer) PrintStats() {
 			zap.Int("errors", f.stats.Errors),
 			zap.Int("totalJobs", len(f.jobs)),
 			zap.Int("totalEvents", len(f.Events)),
+			zap.Int("maxWorkers", f.maxWorkers),
 			zap.Float64("req/s", f.stats.ReqPerSec),
 			zap.Duration("runtime", time.Since(f.Started)),
 		)

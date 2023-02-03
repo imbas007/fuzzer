@@ -46,6 +46,12 @@ type Config struct {
 	// Filters perform filtering out of results per words, lines, size of body etc
 	Filters Filters `json:"filters"`
 
+	// UserAgent defines custom user agent
+	UserAgent string `json:"userAgent"`
+
+	// PseudoRandomUserAgent randomize defined user agent
+	PseudoRandomUserAgent bool `json:"pseudoRandomUserAgent"`
+
 	// ProxyURL defines HTTP forwarding proxy if set
 	ProxyURL string `json:"proxyURL"`
 

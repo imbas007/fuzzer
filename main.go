@@ -19,6 +19,8 @@ func main() {
 	filterLines := flag.String("fl", "", "123,321")
 	filterWords := flag.String("fw", "", "1,2,3")
 	filterSize := flag.String("fs", "", "300,200")
+	userAgent := flag.String("ua", "", "custom user agent")
+	pseudoRandomUserAgent := flag.Bool("prua", false, "pseudo random user agent")
 
 	outFile := flag.String("o", "", "/tmp/outFile.json")
 	wordList := flag.String("w", "", "wordlists/big.txt")
@@ -28,13 +30,15 @@ func main() {
 	flag.Parse()
 
 	f, err := fuzzer.New(&fuzzer.Config{
-		URL:       *url,
-		Method:    *method,
-		ProxyURL:  *proxyURL,
-		OutFile:   *outFile,
-		WordList:  *wordList,
-		MaxTime:   time.Duration(*maxTime) * time.Second,
-		MaxReqSec: *maxReqSec,
+		URL:                   *url,
+		Method:                *method,
+		ProxyURL:              *proxyURL,
+		OutFile:               *outFile,
+		WordList:              *wordList,
+		UserAgent:             *userAgent,
+		PseudoRandomUserAgent: *pseudoRandomUserAgent,
+		MaxTime:               time.Duration(*maxTime) * time.Second,
+		MaxReqSec:             *maxReqSec,
 		Filters: fuzzer.Filters{
 			StatusCodes: fuzzer.GetUniqueNumbers(*filterCodes, ","),
 			Words:       fuzzer.GetUniqueNumbers(*filterWords, ","),
