@@ -156,6 +156,9 @@ func New(config *Config) (f *Fuzzer, err error) {
 	}
 
 	f.maxWorkers = runtime.NumCPU() * 4
+	if f.maxWorkers < 32 {
+		f.maxWorkers = 32
+	}
 
 	f.jobs = make(chan job, f.maxWorkers*4)
 	f.results = make(chan Result, f.maxWorkers*4)
