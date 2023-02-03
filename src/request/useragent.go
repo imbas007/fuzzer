@@ -12,6 +12,8 @@ const (
 func GetUserAgent(ua string, pseudoRandom bool) (res string) {
 	if ua == "" {
 		res = userAgent
+	} else {
+		res = ua
 	}
 
 	if pseudoRandom {
