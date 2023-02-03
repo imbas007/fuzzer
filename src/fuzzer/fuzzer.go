@@ -151,15 +151,15 @@ func New(config *Config) (f *Fuzzer, err error) {
 
 	f.maxWorkers = runtime.NumCPU() * 4
 
-	f.jobs = make(chan job, 4096)
-	f.results = make(chan Result, 4096)
+	f.jobs = make(chan job, f.maxWorkers*4)
+	f.results = make(chan Result, f.maxWorkers*4)
 	f.control = make(chan bool, f.maxWorkers+3)
 	f.Started = time.Now()
 	f.mutex = &sync.Mutex{}
 	f.statsQueue = make(chan string, f.maxWorkers*4)
 	f.burstyLimiter = make(chan bool, 1)
 	f.Done = make(chan string, 1)
-	f.Events = make(chan Event, 4096)
+	f.Events = make(chan Event, f.maxWorkers*4)
 
 	if f.Log == nil {
 		f.Log = logger.Log

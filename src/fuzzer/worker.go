@@ -87,7 +87,7 @@ func (f *Fuzzer) Worker(id int) {
 			}
 			select {
 			case f.Events <- event:
-			case <-time.After(10 * time.Millisecond):
+			case <-time.After(1 * time.Millisecond):
 			}
 
 			continue

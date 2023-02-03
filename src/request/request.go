@@ -35,7 +35,8 @@ func Setup(proxyURL string) {
 	client = &http.Client{
 		Timeout: timeout,
 		Transport: &http.Transport{
-			Proxy: proxy,
+			ForceAttemptHTTP2: true,
+			Proxy:             proxy,
 			DialContext: (&net.Dialer{
 				Timeout: 10 * time.Second,
 			}).DialContext,
@@ -50,7 +51,7 @@ func Setup(proxyURL string) {
 				InsecureSkipVerify: true,
 			},
 
-			DisableKeepAlives:   true,
+			DisableKeepAlives:   false,
 			MaxIdleConns:        1000,
 			MaxIdleConnsPerHost: 500,
 			MaxConnsPerHost:     500,
@@ -59,7 +60,7 @@ func Setup(proxyURL string) {
 }
 
 const (
-	maxReadSize = 5 << 20
+	maxReadSize = 1 << 20
 )
 
 func Do(address, method string, body []byte, headers http.Header, customLogger *zap.Logger) (result []byte, statusCode int, location string, err error) {
@@ -74,6 +75,13 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 		zap.Int("lenBody", len(body)),
 	),
 	)
+
+	// tsStart := time.Now()
+	// defer func() {
+	// 	log.Debug("finished do request",
+	// 		zap.Duration("duration", time.Since(tsStart)),
+	// 	)
+	// }()
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout+time.Duration(2)*time.Second)
 	defer cancel()
@@ -111,11 +119,14 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 		return
 	}
 
-	// Read only maxSize
+	// initial size of result
 	result = make([]byte, 0, 256<<10)
-	buf := make([]byte, 4096)
+
+	// buffer size
+	buf := make([]byte, 1024)
 	var n int
 
+	// Read only maxSize
 	for {
 		n, err = resp.Body.Read(buf)
 
@@ -123,8 +134,8 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 			buf = buf[:n]
 			result = append(result, buf...)
 
-			if len(result) > maxReadSize<<20 {
-				result = result[:maxReadSize<<20]
+			if len(result) > maxReadSize {
+				result = result[:maxReadSize]
 				err = errors.New("file limit has reached")
 				break
 			}
