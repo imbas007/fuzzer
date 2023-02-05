@@ -24,7 +24,6 @@ func (f *Fuzzer) saveResults() {
 	fd, err := os.OpenFile(f.OutFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		f.totalWorkers--
-		fd.Sync()
 
 		f.Log.Error("error in opening out file",
 			zap.Error(err),
@@ -36,6 +35,8 @@ func (f *Fuzzer) saveResults() {
 	defer func() {
 		f.mutex.Lock()
 		defer f.mutex.Unlock()
+
+		fd.Sync()
 
 		if !f.IsSilent {
 			f.Log.Debug("shutting down results worker",
