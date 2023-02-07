@@ -230,7 +230,7 @@ func (f *Fuzzer) Start() {
 		for {
 			time.Sleep(3 * time.Second)
 
-			if f.stats.Total == f.stats.Processed {
+			if f.stats.Total > 0 && f.stats.Total == f.stats.Processed {
 				log.Info("fuzzer processed all")
 				f.Stop()
 				f.Done <- "done"
