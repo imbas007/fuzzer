@@ -234,6 +234,7 @@ func (f *Fuzzer) Start() {
 			if isCounted && f.stats.Total == f.stats.Processed {
 				log.Info("fuzzer processed all",
 					zap.Int("total", f.stats.Total),
+					zap.Int("errors", f.stats.Errors),
 					zap.Int("processed", f.stats.Processed),
 				)
 
