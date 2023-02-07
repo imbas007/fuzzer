@@ -73,7 +73,7 @@ func (f *Fuzzer) PrintStats() {
 	}
 }
 
-func (f *Fuzzer) printStats(interval time.Duration) {
+func (f *Fuzzer) processStats(interval time.Duration) {
 	for {
 		select {
 		case <-f.control:

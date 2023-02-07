@@ -226,12 +226,17 @@ func (f *Fuzzer) Start() {
 	}
 
 	// wait until is done
+	isCounted := false
 	go func() {
 		for {
 			time.Sleep(3 * time.Second)
 
-			if f.stats.Total > 0 && f.stats.Total == f.stats.Processed {
-				log.Info("fuzzer processed all")
+			if isCounted && f.stats.Total == f.stats.Processed {
+				log.Info("fuzzer processed all",
+					zap.Int("total", f.stats.Total),
+					zap.Int("processed", f.stats.Processed),
+				)
+
 				f.Stop()
 				f.Done <- "done"
 				return
@@ -284,6 +289,7 @@ func (f *Fuzzer) Start() {
 		f.stats.Total++
 	}
 	fd.Seek(0, io.SeekStart)
+	isCounted = true
 
 	var (
 		shouldWork = true
@@ -308,7 +314,7 @@ func (f *Fuzzer) Start() {
 	}()
 
 	// print stats
-	go f.printStats(3 * time.Second)
+	go f.processStats(3 * time.Second)
 
 	// start results
 	go f.saveResults()
