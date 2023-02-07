@@ -213,9 +213,7 @@ func (f *Fuzzer) Start() {
 
 	// max runtime go routine
 	if f.MaxTime.Seconds() > 1 {
-		log.Warn("max time is defined. setting countdown",
-			zap.Duration("maxTime", f.MaxTime),
-		)
+		log.Warn("max time is defined. setting countdown")
 		go func() {
 			<-time.After(f.MaxTime)
 			f.Stop()
