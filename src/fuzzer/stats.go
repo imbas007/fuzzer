@@ -22,7 +22,7 @@ type stats struct {
 }
 
 func (f *Fuzzer) calculateStats() {
-	duration := time.Since(f.stats.LastCalculated)
+	duration := time.Since(f.Started)
 	seconds := duration.Seconds()
 	processed := f.stats.Processed - f.stats.LastProcessed
 	reqPerSec := float64(processed) / float64(seconds)
