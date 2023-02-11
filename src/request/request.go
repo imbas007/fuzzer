@@ -183,7 +183,7 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 
 			log.Error("error in processing response",
 				zap.Error(err),
-				zap.Int("downloadedBytes", n),
+				zap.Int("downloadedBytes", len(result)),
 				zap.Int("statusCode", statusCode),
 				zap.String("status", status),
 			)
