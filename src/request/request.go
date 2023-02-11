@@ -72,6 +72,7 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 	log = customLogger.WithOptions(zap.Fields(
 		zap.String("address", address),
 		zap.String("method", method),
+		zap.Any("headers", headers),
 		zap.Int("lenBody", len(body)),
 	),
 	)
