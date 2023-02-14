@@ -64,25 +64,13 @@ const (
 )
 
 func Do(address, method string, body []byte, headers http.Header, customLogger *zap.Logger) (result []byte, statusCode int, location string, err error) {
-	var (
-		status string
-		log    *zap.Logger
-	)
-
-	log = customLogger.WithOptions(zap.Fields(
+	log := customLogger.WithOptions(zap.Fields(
 		zap.String("address", address),
 		zap.String("method", method),
 		zap.Any("headers", headers),
 		zap.Int("lenBody", len(body)),
 	),
 	)
-
-	// tsStart := time.Now()
-	// defer func() {
-	// 	log.Debug("finished do request",
-	// 		zap.Duration("duration", time.Since(tsStart)),
-	// 	)
-	// }()
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout+time.Duration(2)*time.Second)
 	defer cancel()
@@ -164,7 +152,7 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 
 	if resp != nil {
 		location = resp.Request.URL.String()
-		status = resp.Status
+		// status = resp.Status
 		statusCode = resp.StatusCode
 	}
 
@@ -180,14 +168,6 @@ func Do(address, method string, body []byte, headers http.Header, customLogger *
 	default:
 		if n == 0 {
 			err = nil
-		} else {
-
-			log.Error("error in processing response",
-				zap.Error(err),
-				zap.Int("downloadedBytes", len(result)),
-				zap.Int("statusCode", statusCode),
-				zap.String("status", status),
-			)
 		}
 	}
 
